@@ -240,8 +240,11 @@ body {
         overflow: hidden;
 
         #echart {
-            width: 100% !important;
-            height: auto !important;
+            /* this were from when i was using chartjs...and was very responsive */
+            /* width: 100% !important; */
+            /* height: auto !important; */ 
+            width: 100%;
+            height: auto;
             background-color: rgb(250, 240, 240);
             border-radius: 5px;
         }
