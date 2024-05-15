@@ -12,8 +12,8 @@ import "bytes"
 
 import "time"
 
-import "github.com/go-echarts/go-echarts/v2/charts"
-
+// import "github.com/go-echarts/go-echarts/v2/charts"
+// import "html/template"
 func ScreenTimePage() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -71,7 +71,7 @@ func mainFocus() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ChartWrapper(createBarChart()).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = ChartWrapper().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -94,7 +94,7 @@ func mainFocus() templ.Component {
 	})
 }
 
-func ChartWrapper(chart *charts.Bar) templ.Component {
+func ChartWrapper() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -111,7 +111,7 @@ func ChartWrapper(chart *charts.Bar) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = ConvertChartToTemplComponent(chart).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.FromGoHTML(htmlSnippet, nil).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -126,11 +126,6 @@ func ChartWrapper(chart *charts.Bar) templ.Component {
 	})
 }
 
-//	templ ChartWrapper() {
-//		<div class="chart-wrapper">
-//			<canvas id="echart"></canvas>
-//		</div>
-//	}
 func chartHighlight() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -180,7 +175,7 @@ func chartControls() templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(v)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 59, Col: 38}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 55, Col: 38}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -193,7 +188,7 @@ func chartControls() templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(v)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 59, Col: 44}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `screentime.page.templ`, Line: 55, Col: 44}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {

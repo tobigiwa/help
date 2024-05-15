@@ -2,7 +2,9 @@ package main
 
 import "time"
 
-import "github.com/go-echarts/go-echarts/v2/charts"
+// import "github.com/go-echarts/go-echarts/v2/charts"
+// import "html/template"
+
 templ ScreenTimePage() {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -25,26 +27,20 @@ templ ScreenTimePage() {
 templ mainFocus() {
 	<div class="main">
 		@Header()
-		@ChartWrapper(createBarChart())
-		// @ChartWrapper()
+		@ChartWrapper()
 		@chartControls()
 		@chartHighlight()
 	</div>
 }
 
-templ ChartWrapper(chart *charts.Bar) {
+templ ChartWrapper() {
 	<div class="chart-wrapper">
 		<div id="echart">
-			@ConvertChartToTemplComponent(chart)
+			@templ.FromGoHTML(htmlSnippet, nil)
 		</div>
 	</div>
 }
 
-// templ ChartWrapper() {
-// 	<div class="chart-wrapper">
-// 		<canvas id="echart"></canvas>
-// 	</div>
-// }
 templ chartHighlight() {
 	<div class="chart-highlight" id="highlight" hx-post="/your-endpoint-url" hx-trigger="change from:#echart"></div>
 }
