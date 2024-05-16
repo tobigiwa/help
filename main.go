@@ -8,35 +8,24 @@ import (
 	"html/template"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/a-h/templ"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
-	chartrender "github.com/go-echarts/go-echarts/v2/render"
 )
 
-var htmlSnippet *template.Template
+var htmlSnippet template.HTML
+var barChart *charts.Bar
 
 func main() {
-	pie := charts.NewPie()
 
-	pie.Renderer = newSnippetRenderer(pie, pie.Validate)
-
-	pieData := []opts.PieData{
-		{Name: "Dead Cases", Value: 123},
-		{Name: "Recovered Cases", Value: 456},
-		{Name: "Active Cases", Value: 789},
-	}
-
-	// put data into chart
-	pie.AddSeries("Case Distribution", pieData).SetSeriesOptions(
-		charts.WithLabelOpts(opts.Label{Show: true, Formatter: "{b}: {c}"}),
-	)
-
-	htmlSnippet = renderToHtml(pie)
+	htmlSnippet = renderToHtml(pieChart())
+	barChart = createBarChart()
 
 	server := &http.Server{
 		Addr:    ":8081",
@@ -80,29 +69,45 @@ func ScreenTimePageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type Renderer interface {
-	Render(w io.Writer) error
+// ###################################################THE PIE CHART##########################################################################3
+
+func pieChart() *charts.Pie {
+	pie := charts.NewPie()
+
+	pie.Renderer = newSnippetRenderer(pie, pie.Validate)
+
+	pieData := []opts.PieData{
+		{Name: "Dead Cases", Value: 123},
+		{Name: "Recovered Cases", Value: 456},
+		{Name: "Active Cases", Value: 789},
+	}
+
+	// put data into chart
+	pie.AddSeries("Case Distribution", pieData).SetSeriesOptions(
+		charts.WithLabelOpts(opts.Label{Show: true, Formatter: "{b}: {c}"}),
+	)
+
+	return pie
+}
+
+func renderToHtml(c Renderer) template.HTML {
+	var buf bytes.Buffer
+	err := c.Render(&buf)
+	if err != nil {
+		log.Printf("Failed to render chart: %s", err)
+		return ""
+	}
+
+	return template.HTML(buf.String())
+}
+
+func newSnippetRenderer(c interface{}, before ...func()) Renderer {
+	return &snippetRenderer{c: c, before: before}
 }
 
 type snippetRenderer struct {
 	c      interface{}
 	before []func()
-}
-
-func renderToHtml(c interface{}) *template.Template {
-	var buf bytes.Buffer
-	r := c.(chartrender.Renderer)
-	err := r.Render(&buf)
-	if err != nil {
-		log.Printf("Failed to render chart: %s", err)
-		return nil
-	}
-
-	return template.New(buf.String())
-}
-
-func newSnippetRenderer(c interface{}, before ...func()) chartrender.Renderer {
-	return &snippetRenderer{c: c, before: before}
 }
 
 func (r *snippetRenderer) Render(w io.Writer) error {
@@ -143,65 +148,46 @@ var baseTpl = `
 </script>
 `
 
+// ###################################################THE BAR CHART##########################################################################3
+func createBarChart() *charts.Bar {
+	const actionsWithEchartInstance = `
+ const myChart = %MY_ECHARTS%;
+ window.onresize = function ()
+     {
+         myChart.resize();
+     };`
+	bar := charts.NewBar()
+	bar.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title:    "title and legend options",
+			Subtitle: "go-echarts is an awesome chart library written in Golang",
+			Link:     "https://github.com/go-echarts/go-echarts",
+			Right:    "40%",
+		}),
+		charts.WithLegendOpts(opts.Legend{Right: "80%"}),
+	)
+	weeks := []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
 
+	// bar.AddJSFuncs(opts.FuncOpts(actionsWithEchartInstance))
+	bar.SetXAxis(weeks).
+		AddSeries("Category A", generateBarItems()).
+		AddSeries("Category B", generateBarItems())
+	return bar
+}
 
+type Renderer interface {
+	Render(w io.Writer) error
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// func createBarChart() *charts.Bar {
-// 	bar := charts.NewBar()
-// 	bar.SetGlobalOptions(
-// 		charts.WithTitleOpts(opts.Title{
-// 			Title:    "title and legend options",
-// 			Subtitle: "go-echarts is an awesome chart library written in Golang",
-// 			Link:     "https://github.com/go-echarts/go-echarts",
-// 			Right:    "40%",
-// 		}),
-// 		charts.WithLegendOpts(opts.Legend{Right: "80%"}),
-// 	)
-// 	// bar.AddJSFuncs(opts.FuncOpts(actionsWithEchartInstance))
-// 	bar.SetXAxis(weeks).
-// 		AddSeries("Category A", generateBarItems()).
-// 		AddSeries("Category B", generateBarItems())
-// 	return bar
-// }
-
-// var (
-// 	itemCnt = 7
-// 	weeks   = []string{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"}
-// )
-
-// type Renderable interface {
-// 	Render(w io.Writer) error
-// }
-
-// func ConvertChartToTemplComponent(chart Renderable) templ.Component {
-// 	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
-// 		return chart.Render(w)
-// 	})
-// }
-
-// func generateBarItems() []opts.BarData {
-// 	items := make([]opts.BarData, 0)
-// 	for i := 0; i < 7; i++ {
-// 		items = append(items, opts.BarData{Value: rand.Intn(300)})
-// 	}
-// 	return items
-// }
+func ConvertChartToTemplComponent(chart Renderer) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		return chart.Render(w)
+	})
+}
+func generateBarItems() []opts.BarData {
+	items := make([]opts.BarData, 0)
+	for i := 0; i < 7; i++ {
+		items = append(items, opts.BarData{Value: rand.Intn(300)})
+	}
+	return items
+}

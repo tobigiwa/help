@@ -4,7 +4,6 @@ import "time"
 
 // import "github.com/go-echarts/go-echarts/v2/charts"
 // import "html/template"
-
 templ ScreenTimePage() {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -36,7 +35,10 @@ templ mainFocus() {
 templ ChartWrapper() {
 	<div class="chart-wrapper">
 		<div id="echart">
-			@templ.FromGoHTML(htmlSnippet, nil)
+			// the pieChart
+			@templ.Raw(htmlSnippet)
+			// the barChar
+			// @ConvertChartToTemplComponent(barChart)
 		</div>
 	</div>
 }
