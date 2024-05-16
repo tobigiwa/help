@@ -245,8 +245,22 @@ body {
             /* this were from when i was using chartjs...and was very responsive */
             width: 100% !important ;
             height: auto !important; 
-            background-color: rgb(255, 255, 255);
+            background-color: rgb(255, 253, 253);
             border-radius: 5px;
+
+            .container {
+                width: 80% !important;
+                height: auto !important;
+                background-color: rgb(117, 138, 104);
+                border-radius: 5px;
+
+                .item {
+                    width: 70% !important;
+                    height: auto !important;
+                    background-color: rgb(202, 146, 146);
+                    border-radius: 5px;
+                }
+            }
         }
     }
 
